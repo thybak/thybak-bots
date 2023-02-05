@@ -54,28 +54,49 @@ class KkBotTest {
         Mockito.verify(mockedAction, Mockito.times(0)).executeAction(update);
     }
 
+    @Test
+    void givenANotActionText_whenOnUpdateReceived_thenDoNothing() {
+        kkBotActions.clear();
+        KkBotAction mockedAction = TestHelper.givenMockedAction();
+        kkBotActions.add(mockedAction);
+
+        Update update = TestHelper.givenNoActionUpdate();
+        kkBot.onUpdateReceived(update);
+
+        Mockito.verify(mockedAction, Mockito.times(0)).executeAction(update);
+    }
+
 
     private final static class TestHelper {
         private static final String COMMAND = "COMMAND";
         private static final Long CHAT_ID = 1L;
 
         private static Update givenUpdateAction() {
-            Message message = new Message();
-            Chat chat = new Chat();
-            chat.setId(CHAT_ID);
-            message.setText(COMMAND);
-            message.setChat(chat);
-            Update update = new Update();
-            update.setMessage(message);
+            Update update = createUpdate();
+            update.getMessage().setText(COMMAND);
 
             return update;
         }
 
         private static Update givenNotFoundAction() {
+            Update update = createUpdate();
+            update.getMessage().setText("/notFoundAction");
+
+            return update;
+        }
+
+        private static Update givenNoActionUpdate() {
+            Update update = createUpdate();
+            update.getMessage().setText("NO_ACTION");
+
+            return update;
+        }
+
+        private static Update createUpdate() {
             Message message = new Message();
             Chat chat = new Chat();
             chat.setId(CHAT_ID);
-            message.setText("NOT_FOUND");
+            message.setText("NO_ACTION");
             message.setChat(chat);
             Update update = new Update();
             update.setMessage(message);

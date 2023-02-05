@@ -31,8 +31,10 @@ public class KkBot extends TelegramLongPollingBot {
             return;
 
         String updateText = update.getMessage().getText();
-
         Optional<KkBotAction> kkBotAction = kkBotActions.stream().filter(kkBotActionItem -> kkBotActionItem.getCommand().equals(updateText)).findFirst();
+
+        if (kkBotAction.isEmpty() && !updateText.startsWith("/"))
+            return;
 
         SendMessage responseMessageSender;
         if (kkBotAction.isEmpty()) {
