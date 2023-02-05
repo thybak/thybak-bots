@@ -27,6 +27,9 @@ public class KkBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+        if (update.getMessage() == null)
+            return;
+
         String updateText = update.getMessage().getText();
 
         Optional<KkBotAction> kkBotAction = kkBotActions.stream().filter(kkBotActionItem -> kkBotActionItem.getCommand().equals(updateText)).findFirst();
