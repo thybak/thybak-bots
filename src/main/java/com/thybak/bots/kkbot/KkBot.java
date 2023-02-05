@@ -30,7 +30,6 @@ public class KkBot extends TelegramLongPollingBot {
         if (update.getMessage() == null)
             return;
 
-        System.out.printf("Mensaje leído: %s%n", update);
         String updateText = update.getMessage().getText();
 
         Optional<KkBotAction> kkBotAction = kkBotActions.stream().filter(kkBotActionItem -> kkBotActionItem.getCommand().equals(updateText)).findFirst();
@@ -54,8 +53,5 @@ public class KkBot extends TelegramLongPollingBot {
 
     private static final class Constants {
         private static final String ACTION_NOT_FOUND = "Que lo qué? No entiendo lo que me dices, te oigo desde el WC";
-
     }
-
-
 }
