@@ -39,7 +39,7 @@ public class KkBotService {
 
         Poo poo = new Poo(message.getFrom().getUserName(), Instant.now(), message.getChatId());
         try {
-            logger.error("{}%n", pooRepository.save(poo));
+            logger.info("KK satisfactoriamente registrada {}%n", pooRepository.save(poo));
             return true;
         } catch (Exception exception) {
             logger.error("Hubo un error almacenando en la base de datos el siguiente elemento -> {}", poo);

@@ -1,5 +1,7 @@
 package com.thybak.bots.config;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -11,6 +13,7 @@ import java.util.List;
 
 @Configuration
 public class BotsRegistration {
+    private static final Logger logger = LoggerFactory.getLogger(BotsRegistration.class);
     @Autowired
     public BotsRegistration(List<TelegramLongPollingBot> bots) {
         try {
@@ -19,7 +22,7 @@ public class BotsRegistration {
                 botsApi.registerBot(bot);
             }
         } catch (TelegramApiException tae) {
-            tae.printStackTrace();
+            logger.error("Hubo una excepción a la hora de iniciar el bot en el registro.", tae);
         }
     }
 }

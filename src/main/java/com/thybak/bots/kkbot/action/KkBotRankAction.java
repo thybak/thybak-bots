@@ -32,15 +32,26 @@ public class KkBotRankAction implements KkBotAction {
     @Override
     public SendMessage executeAction(Update update) {
         SendMessage response = createResponseMessageSenderFrom(update);
-        Message updateMessage = update.getMessage();
-        Optional<PooRankPeriod> period = getPooRankPeriodFrom(updateMessage.getText());
+        Message commandMessage = update.getMessage();
+        Optional<PooRankPeriod> period = getPooRankPeriodFrom(commandMessage.getText());
         if (period.isEmpty()) {
             response.setText(WRONG_PARAMETER_TO_RANK);
             return response;
         }
+        List<PooRankEntry> pooRanking = kkBotService.getPooRankingFrom(period.get(), commandMessage.getChatId());
+        response.setText(getPooRankingFormattedFrom(pooRanking, period.get()));
+        return response;
+    }
 
-        List<PooRankEntry> pooRanking = kkBotService.getPooRankingFrom(period.get(), updateMessage.getChatId());
-        StringBuilder sbRanking = new StringBuilder(String.format(RANK_HEADER_TEMPLATE, period.get().longPeriodName()));
+    private Optional<PooRankPeriod> getPooRankPeriodFrom(String command) {
+        String[] commandSplit = command.split(" ");
+        String period = commandSplit[1];
+        return Arrays.stream(PooRankPeriod.values()).filter(pooRankPeriod -> pooRankPeriod.getPeriodName().equals(period)).findFirst();
+    }
+
+    private String getPooRankingFormattedFrom(List<PooRankEntry> pooRanking, PooRankPeriod period) {
+        StringBuilder sbRanking = new StringBuilder(String.format(RANK_HEADER_TEMPLATE, period.longPeriodName()));
+
         if (pooRanking.isEmpty()) {
             sbRanking.append(NO_RANK_ENTRIES_RETRIEVED);
         } else {
@@ -51,13 +62,6 @@ public class KkBotRankAction implements KkBotAction {
                     });
         }
 
-        response.setText(sbRanking.toString());
-        return response;
-    }
-
-    private Optional<PooRankPeriod> getPooRankPeriodFrom(String command) {
-        String[] commandSplit = command.split(" ");
-        String period = commandSplit[1];
-        return Arrays.stream(PooRankPeriod.values()).filter(pooRankPeriod -> pooRankPeriod.getPeriodName().equals(period)).findFirst();
+        return sbRanking.toString();
     }
 }

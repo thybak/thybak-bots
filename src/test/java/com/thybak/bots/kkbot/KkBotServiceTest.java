@@ -84,11 +84,21 @@ class KkBotServiceTest {
     @Test
     void givenPooDataFromAWeeklyPeriod_whenGetPooRankingFrom_thenReturnPooRanking() {
         givenFixedClock();
-        Mockito.when(pooRepository.findAllByTimestampBetweenAndChatId(TestHelper.INITIAL_WEEK_PERIOD_INSTANT, TestHelper.FINAL_WEEK_PERIOD_INSTANT, TestHelper.CHAT_ID)).thenReturn(TestHelper.POO_ENTRIES);
+        Mockito.when(pooRepository.findAllByTimestampBetweenAndChatId(TestHelper.INITIAL_WEEK_PERIOD_INSTANT, TestHelper.FINAL_WEEK_PERIOD_INSTANT, TestHelper.CHAT_ID)).thenReturn(TestHelper.POO_WEEK_ENTRIES);
 
         List<PooRankEntry> pooRanking = kkBotService.getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
 
-        assertArrayEquals(TestHelper.EXPECTED_POO_RANKING.toArray(), pooRanking.toArray());
+        assertArrayEquals(TestHelper.EXPECTED_WEEK_POO_RANKING.toArray(), pooRanking.toArray());
+    }
+
+    @Test
+    void givenPooDataFromAMonthlyPeriod_whenGetPooRankingFrom_thenReturnPooRanking() {
+        givenFixedClock();
+        Mockito.when(pooRepository.findAllByTimestampBetweenAndChatId(TestHelper.INITIAL_MONTH_PERIOD_INSTANT, TestHelper.FINAL_MONTH_PERIOD_INSTANT, TestHelper.CHAT_ID)).thenReturn(TestHelper.POO_MONTH_ENTRIES);
+
+        List<PooRankEntry> pooRanking = kkBotService.getPooRankingFrom(PooRankPeriod.PAST_MONTH, TestHelper.CHAT_ID);
+
+        assertArrayEquals(TestHelper.EXPECTED_MONTH_POO_RANKING.toArray(), pooRanking.toArray());
     }
 
     private void givenFixedClock() {
@@ -106,17 +116,30 @@ class KkBotServiceTest {
         private static final LocalDate LOCAL_DATE = LocalDate.of(2023, 2, 12);
         private static final Instant INITIAL_WEEK_PERIOD_INSTANT = Instant.parse("2023-01-29T23:00:00Z");
         private static final Instant FINAL_WEEK_PERIOD_INSTANT = Instant.parse("2023-02-05T22:59:59.999999999Z");
+        private static final Instant INITIAL_MONTH_PERIOD_INSTANT = Instant.parse("2022-12-31T23:00:00Z");
+        private static final Instant FINAL_MONTH_PERIOD_INSTANT = Instant.parse("2023-01-31T22:59:59.999999999Z");
 
-        private static final List<Poo> POO_ENTRIES = List.of(
+        private static final List<Poo> POO_WEEK_ENTRIES = List.of(
                 new Poo("USERNAME1", INITIAL_WEEK_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID),
                 new Poo("USERNAME1", INITIAL_WEEK_PERIOD_INSTANT.plus(3L, ChronoUnit.DAYS), CHAT_ID),
                 new Poo("USERNAME1", INITIAL_WEEK_PERIOD_INSTANT.plus(4L, ChronoUnit.DAYS), CHAT_ID),
                 new Poo("USERNAME2", INITIAL_WEEK_PERIOD_INSTANT.plus(1L, ChronoUnit.DAYS), CHAT_ID),
                 new Poo("USERNAME2", INITIAL_WEEK_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID)
         );
-        private static final List<PooRankEntry> EXPECTED_POO_RANKING = List.of(
-          new PooRankEntry("USERNAME1", 3L),
-          new PooRankEntry("USERNAME2", 2L)
+        private static final List<PooRankEntry> EXPECTED_WEEK_POO_RANKING = List.of(
+                new PooRankEntry("USERNAME1", 3L),
+                new PooRankEntry("USERNAME2", 2L)
+        );
+        private static final List<Poo> POO_MONTH_ENTRIES = List.of(
+                new Poo("USERNAME1", INITIAL_MONTH_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID),
+                new Poo("USERNAME1", INITIAL_MONTH_PERIOD_INSTANT.plus(3L, ChronoUnit.DAYS), CHAT_ID),
+                new Poo("USERNAME1", INITIAL_MONTH_PERIOD_INSTANT.plus(4L, ChronoUnit.DAYS), CHAT_ID),
+                new Poo("USERNAME2", INITIAL_MONTH_PERIOD_INSTANT.plus(1L, ChronoUnit.DAYS), CHAT_ID),
+                new Poo("USERNAME2", INITIAL_MONTH_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID)
+        );
+        private static final List<PooRankEntry> EXPECTED_MONTH_POO_RANKING = List.of(
+                new PooRankEntry("USERNAME1", 3L),
+                new PooRankEntry("USERNAME2", 2L)
         );
 
         private static Update givenValidUpdate() {
