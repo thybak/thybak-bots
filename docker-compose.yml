@@ -31,6 +31,7 @@ services:
       POSTGRES_URL: ${POSTGRES_URL}
       KKBOT_USERNAME: ${KKBOT_USERNAME}
       KKBOT_TOKEN: ${KKBOT_TOKEN}
+      KKBOT_GROUP_CHAT_ID: ${KKBOT_GROUP_CHAT_ID}
     depends_on:
       - db
 volumes:
