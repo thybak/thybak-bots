@@ -1,64 +1,86 @@
 package com.thybak.bots.kkbot;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import com.thybak.bots.kkbot.domain.Poo;
+import com.thybak.bots.kkbot.domain.PooRankEntry;
+import com.thybak.bots.kkbot.domain.PooRankPeriod;
+import com.thybak.bots.kkbot.domain.PooRepository;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import java.time.Instant;
-import java.util.Arrays;
+import java.time.*;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class KkBotService {
-    @Autowired
-    PooRepository pooRepository;
+    private static final String SPAIN_LOCAL_ZONE = "Europe/Madrid";
+    private static final ZoneId ZONE_ID = ZoneId.of(SPAIN_LOCAL_ZONE);
+
+    private final Logger logger = LoggerFactory.getLogger(KkBotService.class);
+    private final Clock clock;
+    private final PooRepository pooRepository;
 
     public boolean registerPooFrom(Update update) {
-        if (!isAPoo(update)) {
-            System.out.printf("No se ha enviado una kk %s%n", update);
-            return false;
-        }
-
         Message message = update.getMessage();
         if (!hasAuthorUsername(message)) {
-            System.out.printf("El autor de la kk no tiene username registrado %s%n", update);
+            logger.error("El autor de la kk no tiene username registrado {}", update);
             return false;
         }
         if (message.getChatId() == null) {
-            System.out.printf("El mensaje no tiene ningún chatId asociado, peligro! %s%n", update);
+            logger.error("El mensaje no tiene ningún chatId asociado, peligro! {}", update);
             return false;
         }
 
         Poo poo = new Poo(message.getFrom().getUserName(), Instant.now(), message.getChatId());
         try {
-            System.out.printf("%s%n", pooRepository.save(poo));
+            logger.error("{}%n", pooRepository.save(poo));
             return true;
         } catch (Exception exception) {
-            System.out.printf("Hubo un error almacenando en la base de datos el siguiente elemento -> %s%n", poo);
+            logger.error("Hubo un error almacenando en la base de datos el siguiente elemento -> {}", poo);
             return false;
         }
     }
 
-    private boolean isAPoo(Update update) {
-        if (!update.hasMessage())
-            return false;
+    public List<PooRankEntry> getPooRankingFrom(PooRankPeriod pooRankPeriod, Long chatId) {
+        List<Poo> poos = pooRepository.findAllByTimestampBetweenAndChatId(getInitialInstantFrom(pooRankPeriod), getFinalInstantFrom(pooRankPeriod), chatId);
 
-        Message message = update.getMessage();
-        if (!message.hasText())
-            return false;
+        Map<String, Long> rankingUnsorted = poos.stream().collect(Collectors.groupingBy(Poo::getUsername, Collectors.counting()));
 
-        String text = message.getText();
-        return Arrays.equals(text.getBytes(), Constants.POO_BYTES);
+        List<PooRankEntry> rankEntries = new ArrayList<>();
+        rankingUnsorted.forEach((String username, Long numberOfPoos) -> rankEntries.add(new PooRankEntry(username, numberOfPoos)));
+
+        rankEntries.sort((rankEntry1, rankEntry2) -> rankEntry2.getPoos().compareTo(rankEntry1.getPoos()));
+
+        return rankEntries;
     }
 
     private boolean hasAuthorUsername(Message message) {
         return message.getFrom() != null && message.getFrom().getUserName() != null;
     }
 
-    private static final class Constants {
-        private static final byte[] POO_BYTES = new byte[]{(byte) 0xf0, (byte) 0x9f, (byte) 0x92, (byte) 0xa9};
+    private Instant getInitialInstantFrom(PooRankPeriod pooRankPeriod) {
+        if (pooRankPeriod == PooRankPeriod.PAST_WEEK) {
+            LocalDate pastWeekFirstDay = LocalDate.now(clock).minusWeeks(1L).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+            return pastWeekFirstDay.atStartOfDay(ZONE_ID).toInstant();
+        }
+
+        LocalDate pastMonthFirstDay = LocalDate.now(clock).minusMonths(1);
+        return LocalDate.of(pastMonthFirstDay.getYear(), pastMonthFirstDay.getMonthValue(), 1).atStartOfDay(ZONE_ID).toInstant();
     }
 
-}
+    private Instant getFinalInstantFrom(PooRankPeriod pooRankPeriod) {
+        if (pooRankPeriod == PooRankPeriod.PAST_WEEK) {
+            LocalDate pastWeekLastDay = LocalDate.now(clock).minusWeeks(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
+            return pastWeekLastDay.atTime(LocalTime.MAX).atZone(ZONE_ID).toInstant();
+        }
 
-//
+        LocalDate pastMonthLastDate = LocalDate.now(clock).minusMonths(1).with(TemporalAdjusters.lastDayOfMonth());
+        return pastMonthLastDate.atTime(LocalTime.MAX).atZone(ZONE_ID).toInstant();
+    }
+}

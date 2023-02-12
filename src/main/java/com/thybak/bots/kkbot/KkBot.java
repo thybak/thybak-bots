@@ -1,6 +1,9 @@
 package com.thybak.bots.kkbot;
 
+import com.thybak.bots.kkbot.action.KkBotAction;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -12,6 +15,10 @@ import java.util.Optional;
 @Component
 @RequiredArgsConstructor
 public class KkBot extends TelegramLongPollingBot {
+    private static final String ACTION_NOT_FOUND = "Que lo qué? No entiendo lo que me dices, te oigo desde el WC";
+    private static final String ERROR_WHEN_SENDING_MESSAGE = "Oops! Error al mandar el mensaje.";
+
+    private final Logger logger = LoggerFactory.getLogger(KkBot.class);
     private final KkBotConfiguration kkBotConfiguration;
     private final List<KkBotAction> kkBotActions;
 
@@ -27,10 +34,10 @@ public class KkBot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
-        if (update.getMessage() == null)
+        if (!update.hasMessage() || !update.getMessage().hasText())
             return;
 
-        String updateText = update.getMessage().getText();
+        String updateText = update.getMessage().getText().split(" ")[0];
         Optional<KkBotAction> kkBotAction = kkBotActions.stream().filter(kkBotActionItem -> kkBotActionItem.getCommand().equals(updateText)).findFirst();
 
         if (kkBotAction.isEmpty() && !updateText.startsWith("/"))
@@ -41,7 +48,7 @@ public class KkBot extends TelegramLongPollingBot {
             Long chatId = update.getMessage().getChatId();
             responseMessageSender = new SendMessage();
             responseMessageSender.setChatId(chatId);
-            responseMessageSender.setText(Constants.ACTION_NOT_FOUND);
+            responseMessageSender.setText(ACTION_NOT_FOUND);
         } else {
             responseMessageSender = kkBotAction.get().executeAction(update);
         }
@@ -49,11 +56,7 @@ public class KkBot extends TelegramLongPollingBot {
         try {
             execute(responseMessageSender);
         } catch (Exception ex) {
-            System.out.printf("Oops! Error al mandar el mensaje. Más info: %s%n", ex);
+            logger.error(ERROR_WHEN_SENDING_MESSAGE, ex);
         }
-    }
-
-    private static final class Constants {
-        private static final String ACTION_NOT_FOUND = "Que lo qué? No entiendo lo que me dices, te oigo desde el WC";
     }
 }

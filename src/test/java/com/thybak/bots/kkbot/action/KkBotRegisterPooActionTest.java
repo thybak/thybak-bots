@@ -1,5 +1,6 @@
-package com.thybak.bots.kkbot;
+package com.thybak.bots.kkbot.action;
 
+import com.thybak.bots.kkbot.KkBotService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -11,8 +12,6 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
-
-import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -36,8 +35,7 @@ class KkBotRegisterPooActionTest {
 
         SendMessage response = kkBotRegisterPooAction.executeAction(TestHelper.givenPooUpdate());
 
-        assertTrue(Arrays.stream(TestHelper.SUCCESS_POO_REGISTER_MESSAGES)
-                .anyMatch(message -> message.equals(response.getText())));
+        assertNull(response.getText());
     }
 
     @Test
@@ -50,7 +48,6 @@ class KkBotRegisterPooActionTest {
     }
 
     private static final class TestHelper {
-        private static final String[] SUCCESS_POO_REGISTER_MESSAGES = new String[]{"Tremendo trocolo, espero que te hayas limpiado bien!", "No habrás echado solo una bolita, eh?", "Vaaaamos niño!", "Uffff, creías que este momento nunca llegaría eh?", "OK. Y a mí qué me cuentas?", "Te pagan por cagar o qué?", "Lol o k", "Oh vaya, ten cuidado no te tengan que dar puntos jej", "Caga el cura, caga el papa, de cagar nadie se escapa", "Cagar por la mañana y abundante alarga la vida de cualquier tunante", "Sin duda, de los placeres sin pecar, el más barato es el cagar", "Este man tenía a Jordan colgando del aro"};
         private static final String POO_COMMAND = new String(new byte[]{(byte) 0xf0, (byte) 0x9f, (byte) 0x92, (byte) 0xa9});
         private static final String SAVE_ERROR_MESSAGE = "Mi má, atascaste las tuberías y tu kk no se ha podido guardar. Habla con el Siva o con el Quimi para que limpien tu mierda";
         private static final long CHAT_ID = 1L;

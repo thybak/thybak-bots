@@ -1,5 +1,9 @@
 package com.thybak.bots.kkbot;
 
+import com.thybak.bots.kkbot.domain.Poo;
+import com.thybak.bots.kkbot.domain.PooRankEntry;
+import com.thybak.bots.kkbot.domain.PooRankPeriod;
+import com.thybak.bots.kkbot.domain.PooRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -12,7 +16,12 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -25,6 +34,9 @@ class KkBotServiceTest {
     @Mock
     private PooRepository pooRepository;
 
+    @Mock
+    private Clock clock;
+
     @Test
     void givenAValidUpdate_whenRegisterPooFrom_thenReturnTrue() {
         Update update = TestHelper.givenValidUpdate();
@@ -34,13 +46,6 @@ class KkBotServiceTest {
         assertTrue(kkBotService.registerPooFrom(update));
 
         Mockito.verify(pooRepository).save(ArgumentMatchers.any(Poo.class));
-    }
-
-    @Test
-    void givenAnInvalidUpdateWithInvalidMessage_whenRegisterPooFrom_thenReturnFalse() {
-        Update update = TestHelper.givenInvalidUpdateWithInvalidMessage();
-
-        assertFalse(kkBotService.registerPooFrom(update));
     }
 
     @Test
@@ -68,46 +73,76 @@ class KkBotServiceTest {
         Mockito.verify(pooRepository).save(ArgumentMatchers.any(Poo.class));
     }
 
+    @Test
+    void givenNoPooDataFromAPeriod_whenGetPooRankingFrom_thenReturnEmptyList() {
+        givenFixedClock();
+        Mockito.when(pooRepository.findAllByTimestampBetweenAndChatId(ArgumentMatchers.any(Instant.class), ArgumentMatchers.any(Instant.class), ArgumentMatchers.anyLong())).thenReturn(List.of());
 
+        assertEquals(0, kkBotService.getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID).size());
+    }
+
+    @Test
+    void givenPooDataFromAWeeklyPeriod_whenGetPooRankingFrom_thenReturnPooRanking() {
+        givenFixedClock();
+        Mockito.when(pooRepository.findAllByTimestampBetweenAndChatId(TestHelper.INITIAL_WEEK_PERIOD_INSTANT, TestHelper.FINAL_WEEK_PERIOD_INSTANT, TestHelper.CHAT_ID)).thenReturn(TestHelper.POO_ENTRIES);
+
+        List<PooRankEntry> pooRanking = kkBotService.getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
+
+        assertArrayEquals(TestHelper.EXPECTED_POO_RANKING.toArray(), pooRanking.toArray());
+    }
+
+    private void givenFixedClock() {
+        Clock fixedClock = Clock.fixed(TestHelper.LOCAL_DATE.atStartOfDay(TestHelper.ZONE_ID).toInstant(), TestHelper.ZONE_ID);
+        Mockito.when(clock.instant()).thenReturn(fixedClock.instant());
+        Mockito.when(clock.getZone()).thenReturn(fixedClock.getZone());
+    }
 
     private static final class TestHelper {
-        private TestHelper() {
-        }
-
+        private static final String SPAIN_LOCAL_ZONE = "Europe/Madrid";
+        private static final ZoneId ZONE_ID = ZoneId.of(SPAIN_LOCAL_ZONE);
         private static final String POO_MESSAGE = new String(new byte[]{(byte) 0xf0, (byte) 0x9f, (byte) 0x92, (byte) 0xa9});
-        private static final String RANDOM_MESSAGE = "RANDOM_MESSAGE";
         private static final String USER_NAME = "USER_NAME";
         private static final Long CHAT_ID = 1L;
+        private static final LocalDate LOCAL_DATE = LocalDate.of(2023, 2, 12);
+        private static final Instant INITIAL_WEEK_PERIOD_INSTANT = Instant.parse("2023-01-29T23:00:00Z");
+        private static final Instant FINAL_WEEK_PERIOD_INSTANT = Instant.parse("2023-02-05T22:59:59.999999999Z");
+
+        private static final List<Poo> POO_ENTRIES = List.of(
+                new Poo("USERNAME1", INITIAL_WEEK_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID),
+                new Poo("USERNAME1", INITIAL_WEEK_PERIOD_INSTANT.plus(3L, ChronoUnit.DAYS), CHAT_ID),
+                new Poo("USERNAME1", INITIAL_WEEK_PERIOD_INSTANT.plus(4L, ChronoUnit.DAYS), CHAT_ID),
+                new Poo("USERNAME2", INITIAL_WEEK_PERIOD_INSTANT.plus(1L, ChronoUnit.DAYS), CHAT_ID),
+                new Poo("USERNAME2", INITIAL_WEEK_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID)
+        );
+        private static final List<PooRankEntry> EXPECTED_POO_RANKING = List.of(
+          new PooRankEntry("USERNAME1", 3L),
+          new PooRankEntry("USERNAME2", 2L)
+        );
 
         private static Update givenValidUpdate() {
-            Update update = createUpdateFrom(TestHelper.POO_MESSAGE);
+            Update update = createUpdateFrom();
             update.getMessage().setFrom(createFromUser());
             update.getMessage().setChat(createChat());
 
             return update;
         }
 
-        private static Update givenInvalidUpdateWithInvalidMessage() {
-            return createUpdateFrom(TestHelper.RANDOM_MESSAGE);
-        }
-
         private static Update givenInvalidUpdateWithoutAuthor() {
-            Update update = createUpdateFrom(TestHelper.POO_MESSAGE);
-            return update;
+            return createUpdateFrom();
         }
 
-        private static Update givenInvalidUpdateWithoutChatId () {
-            Update update = createUpdateFrom(TestHelper.POO_MESSAGE);
+        private static Update givenInvalidUpdateWithoutChatId() {
+            Update update = createUpdateFrom();
             update.getMessage().setFrom(createFromUser());
             update.getMessage().setChat(new Chat());
 
             return update;
         }
 
-        private static Update createUpdateFrom(String text) {
+        private static Update createUpdateFrom() {
             Update update = new Update();
             Message message = new Message();
-            message.setText(text);
+            message.setText(TestHelper.POO_MESSAGE);
             update.setMessage(message);
 
             return update;

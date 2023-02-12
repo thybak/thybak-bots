@@ -12,4 +12,5 @@ import org.springframework.context.annotation.Configuration;
 public class KkBotConfiguration {
     private String username;
     private String token;
+    private Long groupChatId;
 }
