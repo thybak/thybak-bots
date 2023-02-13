@@ -77,7 +77,7 @@ public class KkBotService {
 
     private Instant getFinalInstantFrom(PooRankPeriod pooRankPeriod) {
         if (pooRankPeriod == PooRankPeriod.PAST_WEEK) {
-            LocalDate pastWeekLastDay = LocalDate.now(clock).minusWeeks(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
+            LocalDate pastWeekLastDay = LocalDate.now(clock).with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
             return pastWeekLastDay.atTime(LocalTime.MAX).atZone(ZONE_ID).toInstant();
         }
 

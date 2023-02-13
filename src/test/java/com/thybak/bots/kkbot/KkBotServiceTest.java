@@ -113,7 +113,7 @@ class KkBotServiceTest {
         private static final String POO_MESSAGE = new String(new byte[]{(byte) 0xf0, (byte) 0x9f, (byte) 0x92, (byte) 0xa9});
         private static final String USER_NAME = "USER_NAME";
         private static final Long CHAT_ID = 1L;
-        private static final LocalDate LOCAL_DATE = LocalDate.of(2023, 2, 12);
+        private static final LocalDate LOCAL_DATE = LocalDate.of(2023, 2, 6);
         private static final Instant INITIAL_WEEK_PERIOD_INSTANT = Instant.parse("2023-01-29T23:00:00Z");
         private static final Instant FINAL_WEEK_PERIOD_INSTANT = Instant.parse("2023-02-05T22:59:59.999999999Z");
         private static final Instant INITIAL_MONTH_PERIOD_INSTANT = Instant.parse("2022-12-31T23:00:00Z");

@@ -11,8 +11,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 @Component
 @RequiredArgsConstructor
 public class KkBotScheduler {
-    private static final String EVERY_MONDAY_AT_8_AM = "0 8 * * 1";
-    private static final String EVERY_FIRST_DAY_OF_MONTH_AT_8_AM = "0 8 1 * *";
+    private static final String EVERY_MONDAY_AT_8_AM = "0 0 8 * * 1";
+    private static final String EVERY_FIRST_DAY_OF_MONTH_AT_8_AM = "0 0 8 1 * *";
 
     private final KkBot kkBot;
     private final KkBotConfiguration kkBotConfiguration;
