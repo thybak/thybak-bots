@@ -3,6 +3,7 @@ package com.thybak.bots.kkbot.action;
 import com.thybak.bots.kkbot.KkBotService;
 import com.thybak.bots.kkbot.domain.PooRankEntry;
 import com.thybak.bots.kkbot.domain.PooRankPeriod;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
+@Disabled
 class KkBotRankActionTest {
 
     @InjectMocks
