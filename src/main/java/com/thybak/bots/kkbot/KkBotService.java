@@ -48,6 +48,7 @@ public class KkBotService {
     }
 
     public List<PooRankEntry> getPooRankingFrom(PooRankPeriod pooRankPeriod, Long chatId) {
+        logger.info("Cálculo de ranking teniendo en cuenta el siguiente periodo comprendido entre {} - {}", getInitialInstantFrom(pooRankPeriod), getFinalInstantFrom(pooRankPeriod));
         List<Poo> poos = pooRepository.findAllByTimestampBetweenAndChatId(getInitialInstantFrom(pooRankPeriod), getFinalInstantFrom(pooRankPeriod), chatId);
 
         Map<String, Long> rankingUnsorted = poos.stream().collect(Collectors.groupingBy(Poo::getUsername, Collectors.counting()));

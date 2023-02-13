@@ -1,6 +1,7 @@
 package com.thybak.bots.kkbot;
 
 import com.thybak.bots.kkbot.action.KkBotAction;
+import io.micrometer.common.util.StringUtils;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,7 +55,9 @@ public class KkBot extends TelegramLongPollingBot {
         }
 
         try {
-            execute(responseMessageSender);
+            if (!StringUtils.isEmpty(responseMessageSender.getText())) {
+                execute(responseMessageSender);
+            }
         } catch (Exception ex) {
             logger.error(ERROR_WHEN_SENDING_MESSAGE, ex);
         }

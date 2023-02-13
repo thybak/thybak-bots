@@ -39,7 +39,7 @@ public class KkBotRankAction implements KkBotAction {
             return response;
         }
         List<PooRankEntry> pooRanking = kkBotService.getPooRankingFrom(period.get(), commandMessage.getChatId());
-        response.setText(getPooRankingFormattedFrom(pooRanking, period.get()));
+        //response.setText(getPooRankingFormattedFrom(pooRanking, period.get()));
         return response;
     }
 
