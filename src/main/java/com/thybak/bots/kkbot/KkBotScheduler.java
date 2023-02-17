@@ -13,17 +13,18 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class KkBotScheduler {
     private static final String EVERY_MONDAY_AT_8_AM = "0 0 8 * * 1";
     private static final String EVERY_FIRST_DAY_OF_MONTH_AT_8_AM = "0 0 8 1 * *";
+    private static final String SPAIN_LOCAL_ZONE = "Europe/Madrid";
 
     private final KkBot kkBot;
     private final KkBotConfiguration kkBotConfiguration;
 
-    @Scheduled(cron = EVERY_MONDAY_AT_8_AM)
+    @Scheduled(cron = EVERY_MONDAY_AT_8_AM, zone = SPAIN_LOCAL_ZONE)
     public void publishWeeklyRank() {
         Update weeklyRankAction = createRankUpdateAction(PooRankPeriod.PAST_WEEK);
         kkBot.onUpdateReceived(weeklyRankAction);
     }
 
-    @Scheduled(cron = EVERY_FIRST_DAY_OF_MONTH_AT_8_AM)
+    @Scheduled(cron = EVERY_FIRST_DAY_OF_MONTH_AT_8_AM, zone = SPAIN_LOCAL_ZONE)
     public void publishMonthlyRank() {
         Update monthlyRankAction = createRankUpdateAction(PooRankPeriod.PAST_MONTH);
         kkBot.onUpdateReceived(monthlyRankAction);
