@@ -1,7 +1,7 @@
 package com.thybak.bots.kkbot.action;
 
+import com.thybak.bots.kkbot.domain.ActionResponse;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
@@ -22,9 +22,7 @@ public class KkBotHelpAction implements KkBotAction {
     }
 
     @Override
-    public SendMessage executeAction(Update update) {
-        SendMessage response = createResponseMessageSenderFrom(update);
-        response.setText(HELP_COMMAND_TEXT);
-        return response;
+    public ActionResponse executeAction(Update update) {
+        return ActionResponse.builder().text(HELP_COMMAND_TEXT).build();
     }
 }

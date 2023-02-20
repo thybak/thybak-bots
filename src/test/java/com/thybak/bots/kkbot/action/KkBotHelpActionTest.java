@@ -1,10 +1,10 @@
 package com.thybak.bots.kkbot.action;
 
+import com.thybak.bots.kkbot.domain.ActionResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -24,8 +24,8 @@ class KkBotHelpActionTest {
 
     @Test
     void whenExecuteAction_thenReturnHelpCommandMessage() {
-        SendMessage response = kkBotHelpAction.executeAction(TestHelper.givenHelpUpdate());
-        assertEquals(TestHelper.HELP_COMMAND_TEXT, response.getText());
+        ActionResponse actionResponse = kkBotHelpAction.executeAction(TestHelper.givenHelpUpdate());
+        assertEquals(TestHelper.HELP_COMMAND_TEXT, actionResponse.getText());
     }
 
     private static final class TestHelper {

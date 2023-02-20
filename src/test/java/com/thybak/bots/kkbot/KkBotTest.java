@@ -1,8 +1,10 @@
 package com.thybak.bots.kkbot;
 
 import com.thybak.bots.kkbot.action.KkBotAction;
+import com.thybak.bots.kkbot.domain.ActionResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentMatchers;
 import org.mockito.Mockito;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -62,6 +64,7 @@ class KkBotTest {
 
     private final static class TestHelper {
         private static final String COMMAND = "COMMAND";
+        private static final String EXECUTION_RESPONSE = "EXECUTION_RESPONSE";
         private static final Long CHAT_ID = 1L;
 
         private static Update givenUpdateAction() {
@@ -100,6 +103,7 @@ class KkBotTest {
         private static KkBotAction givenMockedAction() {
             KkBotAction kkBotAction = Mockito.mock(KkBotAction.class);
             Mockito.when(kkBotAction.getCommand()).thenReturn(COMMAND);
+            Mockito.when(kkBotAction.executeAction(ArgumentMatchers.any(Update.class))).thenReturn(ActionResponse.builder().text(EXECUTION_RESPONSE).build());
             return kkBotAction;
         }
     }

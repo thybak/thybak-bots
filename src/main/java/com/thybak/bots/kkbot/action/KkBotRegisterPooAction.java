@@ -1,9 +1,9 @@
 package com.thybak.bots.kkbot.action;
 
 import com.thybak.bots.kkbot.KkBotService;
+import com.thybak.bots.kkbot.domain.ActionResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
@@ -20,11 +20,11 @@ public class KkBotRegisterPooAction implements KkBotAction {
     }
 
     @Override
-    public SendMessage executeAction(Update update) {
-        SendMessage response = createResponseMessageSenderFrom(update);
+    public ActionResponse executeAction(Update update) {
+        ActionResponse actionResponse = new ActionResponse();
         if (!kkBotService.registerPooFrom(update)) {
-            response.setText(SAVE_ERROR_MESSAGE);
+            actionResponse.setText(SAVE_ERROR_MESSAGE);
         }
-        return response;
+        return actionResponse;
     }
 }

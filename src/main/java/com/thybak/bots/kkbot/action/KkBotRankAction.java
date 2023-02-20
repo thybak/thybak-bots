@@ -1,11 +1,11 @@
 package com.thybak.bots.kkbot.action;
 
 import com.thybak.bots.kkbot.KkBotService;
+import com.thybak.bots.kkbot.domain.ActionResponse;
 import com.thybak.bots.kkbot.domain.PooRankEntry;
 import com.thybak.bots.kkbot.domain.PooRankPeriod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
@@ -30,17 +30,14 @@ public class KkBotRankAction implements KkBotAction {
     }
 
     @Override
-    public SendMessage executeAction(Update update) {
-        SendMessage response = createResponseMessageSenderFrom(update);
+    public ActionResponse executeAction(Update update) {
         Message commandMessage = update.getMessage();
         Optional<PooRankPeriod> period = getPooRankPeriodFrom(commandMessage.getText());
         if (period.isEmpty()) {
-            response.setText(WRONG_PARAMETER_TO_RANK);
-            return response;
+            return ActionResponse.builder().text(WRONG_PARAMETER_TO_RANK).build();
         }
         List<PooRankEntry> pooRanking = kkBotService.getPooRankingFrom(period.get(), commandMessage.getChatId());
-        response.setText(getPooRankingFormattedFrom(pooRanking, period.get()));
-        return response;
+        return ActionResponse.builder().text(getPooRankingFormattedFrom(pooRanking, period.get())).build();
     }
 
     private Optional<PooRankPeriod> getPooRankPeriodFrom(String command) {

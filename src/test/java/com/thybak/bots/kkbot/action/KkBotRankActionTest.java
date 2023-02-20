@@ -1,16 +1,15 @@
 package com.thybak.bots.kkbot.action;
 
 import com.thybak.bots.kkbot.KkBotService;
+import com.thybak.bots.kkbot.domain.ActionResponse;
 import com.thybak.bots.kkbot.domain.PooRankEntry;
 import com.thybak.bots.kkbot.domain.PooRankPeriod;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -32,9 +31,9 @@ class KkBotRankActionTest {
     void givenInvalidRankRequest_whenExecuteAction_thenWrongParameterErrorIsReturned() {
         Update invalidUpdate = TestHelper.givenInvalidPeriodUpdate();
 
-        SendMessage response = kkBotRankAction.executeAction(invalidUpdate);
+        ActionResponse actionResponse = kkBotRankAction.executeAction(invalidUpdate);
 
-        assertEquals(TestHelper.WRONG_PARAMETER_TO_RANK, response.getText());
+        assertEquals(TestHelper.WRONG_PARAMETER_TO_RANK, actionResponse.getText());
         Mockito.verifyNoInteractions(kkBotService);
     }
 
@@ -43,9 +42,9 @@ class KkBotRankActionTest {
         Update validRankRequest = TestHelper.givenValidUpdate();
         Mockito.when(kkBotService.getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(List.of());
 
-        SendMessage response = kkBotRankAction.executeAction(validRankRequest);
+        ActionResponse actionResponse = kkBotRankAction.executeAction(validRankRequest);
 
-        assertEquals(TestHelper.NO_RANK_ENTRIES_RETRIEVED, response.getText());
+        assertEquals(TestHelper.NO_RANK_ENTRIES_RETRIEVED, actionResponse.getText());
         Mockito.verify(kkBotService).getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
     }
 
@@ -54,9 +53,9 @@ class KkBotRankActionTest {
         Update validRankRequest = TestHelper.givenValidUpdate();
         Mockito.when(kkBotService.getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(TestHelper.RANK_ENTRIES);
 
-        SendMessage response = kkBotRankAction.executeAction(validRankRequest);
+        ActionResponse actionResponse = kkBotRankAction.executeAction(validRankRequest);
 
-        assertEquals(TestHelper.RANK_ENTRIES_MESSAGE, response.getText());
+        assertEquals(TestHelper.RANK_ENTRIES_MESSAGE, actionResponse.getText());
         Mockito.verify(kkBotService).getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
     }
 

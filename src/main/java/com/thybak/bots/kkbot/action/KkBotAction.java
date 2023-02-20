@@ -1,19 +1,11 @@
 package com.thybak.bots.kkbot.action;
 
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import com.thybak.bots.kkbot.domain.ActionResponse;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 public interface KkBotAction {
-    default SendMessage createResponseMessageSenderFrom(Update update) {
-        final long chatId = update.getMessage().getChatId();
-        SendMessage responseMessageSender = new SendMessage();
-        responseMessageSender.setChatId(chatId);
-        responseMessageSender.setParseMode(ParseMode.MARKDOWN);
 
-        return responseMessageSender;
-    }
     String getCommand();
-    SendMessage executeAction(Update update);
+    ActionResponse executeAction(Update update);
 
 }

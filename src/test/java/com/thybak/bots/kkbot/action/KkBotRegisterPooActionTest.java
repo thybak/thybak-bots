@@ -1,6 +1,7 @@
 package com.thybak.bots.kkbot.action;
 
 import com.thybak.bots.kkbot.KkBotService;
+import com.thybak.bots.kkbot.domain.ActionResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatchers;
@@ -8,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -33,18 +33,18 @@ class KkBotRegisterPooActionTest {
     void givenSuccessfulPooRegistration_whenExecuteAction_thenReturnRandomSuccessfulMessage() {
         Mockito.when(kkBotService.registerPooFrom(ArgumentMatchers.any(Update.class))).thenReturn(true);
 
-        SendMessage response = kkBotRegisterPooAction.executeAction(TestHelper.givenPooUpdate());
+        ActionResponse actionResponse = kkBotRegisterPooAction.executeAction(TestHelper.givenPooUpdate());
 
-        assertNull(response.getText());
+        assertNull(actionResponse.getText());
     }
 
     @Test
     void givenFailedPooRegistration_whenExecuteAction_thenReturnSaveErrorMessage() {
         Mockito.when(kkBotService.registerPooFrom(ArgumentMatchers.any(Update.class))).thenReturn(false);
 
-        SendMessage response = kkBotRegisterPooAction.executeAction(TestHelper.givenPooUpdate());
+        ActionResponse actionResponse = kkBotRegisterPooAction.executeAction(TestHelper.givenPooUpdate());
 
-        assertEquals(TestHelper.SAVE_ERROR_MESSAGE, response.getText());
+        assertEquals(TestHelper.SAVE_ERROR_MESSAGE, actionResponse.getText());
     }
 
     private static final class TestHelper {
