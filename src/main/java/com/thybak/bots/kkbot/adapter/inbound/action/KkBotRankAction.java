@@ -1,9 +1,9 @@
-package com.thybak.bots.kkbot.action;
+package com.thybak.bots.kkbot.adapter.inbound.action;
 
-import com.thybak.bots.kkbot.KkBotService;
-import com.thybak.bots.kkbot.domain.ActionResponse;
-import com.thybak.bots.kkbot.domain.PooRankEntry;
-import com.thybak.bots.kkbot.domain.PooRankPeriod;
+import com.thybak.bots.kkbot.adapter.inbound.dto.ActionResponse;
+import com.thybak.bots.kkbot.domain.model.PooRankEntry;
+import com.thybak.bots.kkbot.domain.model.PooRankPeriod;
+import com.thybak.bots.kkbot.domain.usecase.GetSecretionRankingUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -22,7 +22,7 @@ public class KkBotRankAction implements KkBotAction {
     private static final String RANK_COMMAND = "/rank";
     private static final String RANK_HEADER_TEMPLATE = "Cagones! Aquí está el ranking de %s:%n";
 
-    private final KkBotService kkBotService;
+    private final GetSecretionRankingUseCase getSecretionRankingUseCase;
 
     @Override
     public String getCommand() {
@@ -31,23 +31,23 @@ public class KkBotRankAction implements KkBotAction {
 
     @Override
     public ActionResponse executeAction(Update update) {
-        Message commandMessage = update.getMessage();
-        Optional<PooRankPeriod> period = getPooRankPeriodFrom(commandMessage.getText());
+        final Message commandMessage = update.getMessage();
+        final Optional<PooRankPeriod> period = getPooRankPeriodFrom(commandMessage.getText());
         if (period.isEmpty()) {
             return ActionResponse.builder().text(WRONG_PARAMETER_TO_RANK).build();
         }
-        List<PooRankEntry> pooRanking = kkBotService.getPooRankingFrom(period.get(), commandMessage.getChatId());
+        final List<PooRankEntry> pooRanking = getSecretionRankingUseCase.run(period.get(), commandMessage.getChatId());
         return ActionResponse.builder().text(getPooRankingFormattedFrom(pooRanking, period.get())).build();
     }
 
     private Optional<PooRankPeriod> getPooRankPeriodFrom(String command) {
-        String[] commandSplit = command.split(" ");
-        String period = commandSplit[1];
+        final String[] commandSplit = command.split(" ");
+        final String period = commandSplit[1];
         return Arrays.stream(PooRankPeriod.values()).filter(pooRankPeriod -> pooRankPeriod.getPeriodName().equals(period)).findFirst();
     }
 
     private String getPooRankingFormattedFrom(List<PooRankEntry> pooRanking, PooRankPeriod period) {
-        StringBuilder sbRanking = new StringBuilder(String.format(RANK_HEADER_TEMPLATE, period.longPeriodName()));
+        final StringBuilder sbRanking = new StringBuilder(String.format(RANK_HEADER_TEMPLATE, period.longPeriodName()));
 
         if (pooRanking.isEmpty()) {
             sbRanking.append(NO_RANK_ENTRIES_RETRIEVED);

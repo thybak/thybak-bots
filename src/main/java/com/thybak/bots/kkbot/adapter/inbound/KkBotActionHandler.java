@@ -1,7 +1,8 @@
-package com.thybak.bots.kkbot;
+package com.thybak.bots.kkbot.adapter.inbound;
 
-import com.thybak.bots.kkbot.action.KkBotAction;
-import com.thybak.bots.kkbot.domain.ActionResponse;
+import com.thybak.bots.kkbot.config.KkBotConfigurationProperties;
+import com.thybak.bots.kkbot.adapter.inbound.action.KkBotAction;
+import com.thybak.bots.kkbot.adapter.inbound.dto.ActionResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,31 +18,31 @@ import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
-public class KkBot extends TelegramLongPollingBot {
+public class KkBotActionHandler extends TelegramLongPollingBot {
     private static final String ACTION_NOT_FOUND = "Que lo qué? No entiendo lo que me dices, te oigo desde el WC";
     private static final String ERROR_WHEN_SENDING_MESSAGE = "Oops! Error al mandar el mensaje.";
 
-    private final Logger logger = LoggerFactory.getLogger(KkBot.class);
-    private final KkBotConfiguration kkBotConfiguration;
+    private final Logger logger = LoggerFactory.getLogger(KkBotActionHandler.class);
+    private final KkBotConfigurationProperties kkBotConfigurationProperties;
     private final List<KkBotAction> kkBotActions;
 
     @Override
     public String getBotUsername() {
-        return kkBotConfiguration.getUsername();
+        return kkBotConfigurationProperties.getUsername();
     }
 
     @Override
     public String getBotToken() {
-        return kkBotConfiguration.getToken();
+        return kkBotConfigurationProperties.getToken();
     }
 
     @Override
     public void onUpdateReceived(Update update) {
-        ActionResponse actionResponse = executeBotActionFrom(update);
+        final ActionResponse actionResponse = executeBotActionFrom(update);
         if (actionResponse == null || !StringUtils.hasLength(actionResponse.getText()))
             return;
 
-        SendMessage messageSender = SendMessage.builder().chatId(update.getMessage().getChatId()).parseMode(ParseMode.MARKDOWN).text(actionResponse.getText()).build();
+        final SendMessage messageSender = SendMessage.builder().chatId(update.getMessage().getChatId()).parseMode(ParseMode.MARKDOWN).text(actionResponse.getText()).build();
         try {
             execute(messageSender);
         } catch (Exception ex) {
@@ -53,8 +54,8 @@ public class KkBot extends TelegramLongPollingBot {
         if (!update.hasMessage() || !update.getMessage().hasText())
             return null;
 
-        String updateText = update.getMessage().getText().split(" ")[0];
-        Optional<KkBotAction> kkBotAction = kkBotActions.stream().filter(kkBotActionItem -> kkBotActionItem.getCommand().equals(updateText)).findFirst();
+        final String updateText = update.getMessage().getText().split(" ")[0];
+        final Optional<KkBotAction> kkBotAction = kkBotActions.stream().filter(kkBotActionItem -> kkBotActionItem.getCommand().equals(updateText)).findFirst();
 
         if (kkBotAction.isEmpty() && !updateText.startsWith("/"))
             return null;

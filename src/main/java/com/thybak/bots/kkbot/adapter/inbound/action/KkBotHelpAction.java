@@ -1,6 +1,6 @@
-package com.thybak.bots.kkbot.action;
+package com.thybak.bots.kkbot.adapter.inbound.action;
 
-import com.thybak.bots.kkbot.domain.ActionResponse;
+import com.thybak.bots.kkbot.adapter.inbound.dto.ActionResponse;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Update;
 

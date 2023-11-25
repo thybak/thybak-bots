@@ -1,9 +1,9 @@
-package com.thybak.bots.kkbot.action;
+package com.thybak.bots.kkbot.adapter.inbound.action;
 
-import com.thybak.bots.kkbot.KkBotService;
-import com.thybak.bots.kkbot.domain.ActionResponse;
-import com.thybak.bots.kkbot.domain.PooRankEntry;
-import com.thybak.bots.kkbot.domain.PooRankPeriod;
+import com.thybak.bots.kkbot.adapter.inbound.dto.ActionResponse;
+import com.thybak.bots.kkbot.domain.model.PooRankEntry;
+import com.thybak.bots.kkbot.domain.model.PooRankPeriod;
+import com.thybak.bots.kkbot.domain.usecase.GetSecretionRankingUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,47 +16,45 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class KkBotRankActionTest {
+    @Mock
+    private GetSecretionRankingUseCase getSecretionRankingUseCase;
 
     @InjectMocks
-    private KkBotRankAction kkBotRankAction;
-
-    @Mock
-    private KkBotService kkBotService;
+    private KkBotRankAction sut;
 
     @Test
     void givenInvalidRankRequest_whenExecuteAction_thenWrongParameterErrorIsReturned() {
         Update invalidUpdate = TestHelper.givenInvalidPeriodUpdate();
 
-        ActionResponse actionResponse = kkBotRankAction.executeAction(invalidUpdate);
+        ActionResponse actionResponse = sut.executeAction(invalidUpdate);
 
         assertEquals(TestHelper.WRONG_PARAMETER_TO_RANK, actionResponse.getText());
-        Mockito.verifyNoInteractions(kkBotService);
+        Mockito.verifyNoInteractions(getSecretionRankingUseCase);
     }
 
     @Test
     void givenRankRequestWithoutData_whenExecuteAction_thenNoRankEntriesErrorIsReturned() {
         Update validRankRequest = TestHelper.givenValidUpdate();
-        Mockito.when(kkBotService.getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(List.of());
+        Mockito.when(getSecretionRankingUseCase.run(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(List.of());
 
-        ActionResponse actionResponse = kkBotRankAction.executeAction(validRankRequest);
-
-        assertEquals(TestHelper.NO_RANK_ENTRIES_RETRIEVED, actionResponse.getText());
-        Mockito.verify(kkBotService).getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
+        ActionResponse actionResponse = sut.executeAction(validRankRequest);
+        assertEquals(TestHelper.NO_RANK_ENTRIES_RETRIEVED.replaceAll("\\r?\\n", System.getProperty("line.separator")), actionResponse.getText());
+        Mockito.verify(getSecretionRankingUseCase).run(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
     }
 
     @Test
     void givenRankRequestWithData_whenExecuteAction_thenRankEntriesAreReturned() {
         Update validRankRequest = TestHelper.givenValidUpdate();
-        Mockito.when(kkBotService.getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(TestHelper.RANK_ENTRIES);
+        Mockito.when(getSecretionRankingUseCase.run(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(TestHelper.RANK_ENTRIES);
 
-        ActionResponse actionResponse = kkBotRankAction.executeAction(validRankRequest);
+        ActionResponse actionResponse = sut.executeAction(validRankRequest);
 
-        assertEquals(TestHelper.RANK_ENTRIES_MESSAGE, actionResponse.getText());
-        Mockito.verify(kkBotService).getPooRankingFrom(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
+        assertEquals(TestHelper.RANK_ENTRIES_MESSAGE.replaceAll("\\r?\\n", System.getProperty("line.separator")), actionResponse.getText());
+        Mockito.verify(getSecretionRankingUseCase).run(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
     }
 
     private static final class TestHelper {

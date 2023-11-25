@@ -1,4 +1,4 @@
-package com.thybak.bots.kkbot.domain;
+package com.thybak.bots.kkbot.domain.model;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;

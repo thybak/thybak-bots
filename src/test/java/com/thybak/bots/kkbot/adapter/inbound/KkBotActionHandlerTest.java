@@ -1,7 +1,7 @@
-package com.thybak.bots.kkbot;
+package com.thybak.bots.kkbot.adapter.inbound;
 
-import com.thybak.bots.kkbot.action.KkBotAction;
-import com.thybak.bots.kkbot.domain.ActionResponse;
+import com.thybak.bots.kkbot.adapter.inbound.action.KkBotAction;
+import com.thybak.bots.kkbot.adapter.inbound.dto.ActionResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentMatchers;
@@ -13,16 +13,16 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import java.util.ArrayList;
 import java.util.List;
 
-class KkBotTest {
+class KkBotActionHandlerTest {
 
-    private KkBot kkBot;
+    private KkBotActionHandler kkBotActionHandler;
 
     private List<KkBotAction> kkBotActions;
 
     @BeforeEach
     public void setup() {
         kkBotActions = new ArrayList<>();
-        kkBot = new KkBot(null, kkBotActions);
+        kkBotActionHandler = new KkBotActionHandler(null, kkBotActions);
     }
 
     @Test
@@ -32,7 +32,7 @@ class KkBotTest {
         kkBotActions.add(mockedAction);
 
         Update update = TestHelper.givenUpdateAction();
-        kkBot.onUpdateReceived(update);
+        kkBotActionHandler.onUpdateReceived(update);
 
         Mockito.verify(mockedAction).executeAction(update);
     }
@@ -44,7 +44,7 @@ class KkBotTest {
         kkBotActions.add(mockedAction);
 
         Update update = TestHelper.givenNotFoundAction();
-        kkBot.onUpdateReceived(update);
+        kkBotActionHandler.onUpdateReceived(update);
 
         Mockito.verify(mockedAction, Mockito.times(0)).executeAction(update);
     }
@@ -56,7 +56,7 @@ class KkBotTest {
         kkBotActions.add(mockedAction);
 
         Update update = TestHelper.givenNoActionUpdate();
-        kkBot.onUpdateReceived(update);
+        kkBotActionHandler.onUpdateReceived(update);
 
         Mockito.verify(mockedAction, Mockito.times(0)).executeAction(update);
     }

@@ -1,6 +1,6 @@
-package com.thybak.bots.kkbot.action;
+package com.thybak.bots.kkbot.adapter.inbound.action;
 
-import com.thybak.bots.kkbot.domain.ActionResponse;
+import com.thybak.bots.kkbot.adapter.inbound.dto.ActionResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Chat;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MockitoExtension.class)
 class KkBotHelpActionTest {

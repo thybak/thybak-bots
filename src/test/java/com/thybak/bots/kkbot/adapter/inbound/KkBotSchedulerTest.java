@@ -1,5 +1,6 @@
-package com.thybak.bots.kkbot;
+package com.thybak.bots.kkbot.adapter.inbound;
 
+import com.thybak.bots.kkbot.config.KkBotConfigurationProperties;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,28 +19,28 @@ class KkBotSchedulerTest {
     private KkBotScheduler kkBotScheduler;
 
     @Mock
-    private KkBot kkBot;
+    private KkBotActionHandler kkBotActionHandler;
 
     @Mock
-    private KkBotConfiguration kkBotConfiguration;
+    private KkBotConfigurationProperties kkBotConfigurationProperties;
 
     @BeforeEach
     public void setUp() {
-        Mockito.when(kkBotConfiguration.getGroupChatId()).thenReturn(TestHelper.CHAT_ID);
+        Mockito.when(kkBotConfigurationProperties.getGroupChatId()).thenReturn(TestHelper.CHAT_ID);
     }
 
     @Test
     void whenPublishWeeklyRank_thenWeeklyRankActionIsTriggered() {
         kkBotScheduler.publishWeeklyRank();
 
-        Mockito.verify(kkBot).onUpdateReceived(TestHelper.createRankWeekRequest());
+        Mockito.verify(kkBotActionHandler).onUpdateReceived(TestHelper.createRankWeekRequest());
     }
 
     @Test
     void whenPublishMonthlyRank_thenMonthlyRankActionIsTriggered() {
         kkBotScheduler.publishMonthlyRank();
 
-        Mockito.verify(kkBot).onUpdateReceived(TestHelper.createRankMonthRequest());
+        Mockito.verify(kkBotActionHandler).onUpdateReceived(TestHelper.createRankMonthRequest());
     }
 
     private static final class TestHelper {

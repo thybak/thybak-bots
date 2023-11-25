@@ -1,6 +1,7 @@
-package com.thybak.bots.kkbot;
+package com.thybak.bots.kkbot.adapter.inbound;
 
-import com.thybak.bots.kkbot.domain.PooRankPeriod;
+import com.thybak.bots.kkbot.config.KkBotConfigurationProperties;
+import com.thybak.bots.kkbot.domain.model.PooRankPeriod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,26 +16,26 @@ public class KkBotScheduler {
     private static final String EVERY_FIRST_DAY_OF_MONTH_AT_8_AM = "0 0 8 1 * *";
     private static final String SPAIN_LOCAL_ZONE = "Europe/Madrid";
 
-    private final KkBot kkBot;
-    private final KkBotConfiguration kkBotConfiguration;
+    private final KkBotActionHandler kkBotActionHandler;
+    private final KkBotConfigurationProperties kkBotConfigurationProperties;
 
     @Scheduled(cron = EVERY_MONDAY_AT_8_AM, zone = SPAIN_LOCAL_ZONE)
     public void publishWeeklyRank() {
-        Update weeklyRankAction = createRankUpdateAction(PooRankPeriod.PAST_WEEK);
-        kkBot.onUpdateReceived(weeklyRankAction);
+        final Update weeklyRankAction = createRankUpdateAction(PooRankPeriod.PAST_WEEK);
+        kkBotActionHandler.onUpdateReceived(weeklyRankAction);
     }
 
     @Scheduled(cron = EVERY_FIRST_DAY_OF_MONTH_AT_8_AM, zone = SPAIN_LOCAL_ZONE)
     public void publishMonthlyRank() {
-        Update monthlyRankAction = createRankUpdateAction(PooRankPeriod.PAST_MONTH);
-        kkBot.onUpdateReceived(monthlyRankAction);
+        final Update monthlyRankAction = createRankUpdateAction(PooRankPeriod.PAST_MONTH);
+        kkBotActionHandler.onUpdateReceived(monthlyRankAction);
     }
 
     private Update createRankUpdateAction(PooRankPeriod pooRankPeriod)
     {
-        Update rankUpdateAction = new Update();
-        Message message = new Message();
-        message.setChat(new Chat(kkBotConfiguration.getGroupChatId(), ""));
+        final Update rankUpdateAction = new Update();
+        final Message message = new Message();
+        message.setChat(new Chat(kkBotConfigurationProperties.getGroupChatId(), ""));
         message.setText(String.format("/rank %s", pooRankPeriod.getPeriodName()));
         rankUpdateAction.setMessage(message);
 

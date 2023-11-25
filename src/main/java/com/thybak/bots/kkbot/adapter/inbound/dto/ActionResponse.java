@@ -1,4 +1,4 @@
-package com.thybak.bots.kkbot.domain;
+package com.thybak.bots.kkbot.adapter.inbound.dto;
 
 import lombok.*;
 

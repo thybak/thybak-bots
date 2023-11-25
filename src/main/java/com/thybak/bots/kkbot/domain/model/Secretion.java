@@ -1,4 +1,4 @@
-package com.thybak.bots.kkbot.domain;
+package com.thybak.bots.kkbot.domain.model;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,10 +10,10 @@ import java.time.Instant;
 @NoArgsConstructor
 @Entity
 @Getter
-public class Poo {
+public class Secretion {
     @Id
-    @SequenceGenerator(name = "poo_sequence", sequenceName = "poo_sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "poo_sequence")
+    @SequenceGenerator(name = "secretion_sequence", sequenceName = "secretion_sequence", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "secretion_sequence")
     @Column(updatable = false)
     private long Id;
 
@@ -29,4 +29,9 @@ public class Poo {
     @NonNull
     @Column(nullable = false)
     private Long chatId;
+
+    @NonNull
+    @Column(columnDefinition = "integer default 0")
+    @Enumerated(EnumType.ORDINAL)
+    private SecretionType secretionType;
 }
