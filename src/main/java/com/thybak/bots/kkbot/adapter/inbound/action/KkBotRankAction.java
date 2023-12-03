@@ -1,14 +1,15 @@
 package com.thybak.bots.kkbot.adapter.inbound.action;
 
 import com.thybak.bots.kkbot.adapter.inbound.dto.ActionResponse;
-import com.thybak.bots.kkbot.domain.model.PooRankEntry;
-import com.thybak.bots.kkbot.domain.model.PooRankPeriod;
+import com.thybak.bots.kkbot.domain.model.SecretionRankEntry;
+import com.thybak.bots.kkbot.domain.model.SecretionRankPeriod;
 import com.thybak.bots.kkbot.domain.usecase.GetSecretionRankingUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -32,30 +33,48 @@ public class KkBotRankAction implements KkBotAction {
     @Override
     public ActionResponse executeAction(Update update) {
         final Message commandMessage = update.getMessage();
-        final Optional<PooRankPeriod> period = getPooRankPeriodFrom(commandMessage.getText());
+        final Optional<SecretionRankPeriod> period = getPooRankPeriodFrom(commandMessage.getText());
         if (period.isEmpty()) {
             return ActionResponse.builder().text(WRONG_PARAMETER_TO_RANK).build();
         }
-        final List<PooRankEntry> pooRanking = getSecretionRankingUseCase.run(period.get(), commandMessage.getChatId());
-        return ActionResponse.builder().text(getPooRankingFormattedFrom(pooRanking, period.get())).build();
+        final List<SecretionRankEntry> secretionRanking = getSecretionRankingUseCase.run(period.get(), commandMessage.getChatId());
+        return ActionResponse.builder().text(getSecretionRankingFormattedFrom(secretionRanking, period.get())).build();
     }
 
-    private Optional<PooRankPeriod> getPooRankPeriodFrom(String command) {
+    private Optional<SecretionRankPeriod> getPooRankPeriodFrom(String command) {
         final String[] commandSplit = command.split(" ");
         final String period = commandSplit[1];
-        return Arrays.stream(PooRankPeriod.values()).filter(pooRankPeriod -> pooRankPeriod.getPeriodName().equals(period)).findFirst();
+        return Arrays.stream(SecretionRankPeriod.values()).filter(pooRankPeriod -> pooRankPeriod.getPeriodName().equals(period)).findFirst();
     }
 
-    private String getPooRankingFormattedFrom(List<PooRankEntry> pooRanking, PooRankPeriod period) {
-        final StringBuilder sbRanking = new StringBuilder(String.format(RANK_HEADER_TEMPLATE, period.longPeriodName()));
+    private String getSecretionRankingFormattedFrom(List<SecretionRankEntry> secretionRanking, SecretionRankPeriod period) {
+        final var sbRanking = new StringBuilder(String.format(RANK_HEADER_TEMPLATE, period.longPeriodName()));
+        final var secretions = new ArrayList<>(secretionRanking);
+        secretions.sort((rankEntry1, rankEntry2) -> rankEntry2.getPoos().compareTo(rankEntry1.getPoos()));
 
-        if (pooRanking.isEmpty()) {
-            sbRanking.append(NO_RANK_ENTRIES_RETRIEVED);
-        } else {
-            IntStream.range(0, pooRanking.size())
+        if (secretions.isEmpty()) {
+            return sbRanking.append(NO_RANK_ENTRIES_RETRIEVED).toString();
+        }
+
+        IntStream.range(0, secretions.size())
+            .forEach(index -> {
+                final var secretionRankEntry = secretions.get(index);
+                if (secretionRankEntry.getPoos() == 0) {
+                    return;
+                }
+                sbRanking.append(String.format("%d - %s con %d kks!%n", index + 1, secretionRankEntry.getUsername(), secretionRankEntry.getPoos()));
+            });
+
+        if (secretions.stream().anyMatch(secretionRankEntry -> secretionRankEntry.getPukes() > 0)) {
+            sbRanking.append(String.format("%nY los que más han vomitado son:%n"));
+            secretions.sort((rankEntry1, rankEntry2) -> rankEntry2.getPukes().compareTo(rankEntry1.getPukes()));
+            IntStream.range(0, secretions.size())
                     .forEach(index -> {
-                        PooRankEntry pooRankEntry = pooRanking.get(index);
-                        sbRanking.append(String.format("%d - %s con %d kks!%n", index + 1, pooRankEntry.getUsername(), pooRankEntry.getPoos()));
+                        final var secretionRankEntry = secretions.get(index);
+                        if (secretionRankEntry.getPukes() == 0) {
+                            return;
+                        }
+                        sbRanking.append(String.format("%d - %s con %d potas!%n", index + 1, secretionRankEntry.getUsername(), secretionRankEntry.getPukes()));
                     });
         }
 

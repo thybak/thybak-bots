@@ -1,8 +1,8 @@
 package com.thybak.bots.kkbot.domain.usecase;
 
 import com.thybak.bots.kkbot.domain.model.Secretion;
-import com.thybak.bots.kkbot.domain.model.PooRankEntry;
-import com.thybak.bots.kkbot.domain.model.PooRankPeriod;
+import com.thybak.bots.kkbot.domain.model.SecretionRankEntry;
+import com.thybak.bots.kkbot.domain.model.SecretionRankPeriod;
 import com.thybak.bots.kkbot.domain.model.SecretionType;
 import com.thybak.bots.kkbot.domain.provider.SecretionRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,25 +24,24 @@ public class GetSecretionRankingUseCase {
     private final Clock clock;
     private final SecretionRepository secretionRepository;
 
-    public List<PooRankEntry> run(PooRankPeriod pooRankPeriod, Long chatId) {
-        logger.info("Cálculo de ranking teniendo en cuenta el siguiente periodo comprendido entre {} - {}", getInitialInstantFrom(pooRankPeriod), getFinalInstantFrom(pooRankPeriod));
-        final List<Secretion> secretions = secretionRepository.findAllByTimestampBetweenAndChatId(getInitialInstantFrom(pooRankPeriod), getFinalInstantFrom(pooRankPeriod), chatId);
+    public List<SecretionRankEntry> run(SecretionRankPeriod secretionRankPeriod, Long chatId) {
+        logger.info("Cálculo de ranking teniendo en cuenta el siguiente periodo comprendido entre {} - {}", getInitialInstantFrom(secretionRankPeriod), getFinalInstantFrom(secretionRankPeriod));
+        final List<Secretion> secretions = secretionRepository.findAllByTimestampBetweenAndChatId(getInitialInstantFrom(secretionRankPeriod), getFinalInstantFrom(secretionRankPeriod), chatId);
+        return getRankEntriesFrom(secretions.stream().collect(Collectors.groupingBy(Secretion::getUsername)));
+    }
 
-        final Map<String, Long> rankingUnsorted = secretions.stream()
-                .filter(secretion -> secretion.getSecretionType().equals(SecretionType.POO))
-                .collect(Collectors.groupingBy(Secretion::getUsername, Collectors.counting()));
-
-        final List<PooRankEntry> rankEntries = new ArrayList<>();
-        rankingUnsorted.forEach((String username, Long numberOfPoos) -> rankEntries.add(new PooRankEntry(username, numberOfPoos)));
-
-        rankEntries.sort((rankEntry1, rankEntry2) -> rankEntry2.getPoos().compareTo(rankEntry1.getPoos()));
-
+    private List<SecretionRankEntry> getRankEntriesFrom(Map<String, List<Secretion>> rankingUnsorted) {
+        final List<SecretionRankEntry> rankEntries = new ArrayList<>();
+        rankingUnsorted.forEach((String username, List<Secretion> secretionsByUser) ->
+                rankEntries.add(new SecretionRankEntry
+                        (username,
+                        secretionsByUser.stream().filter(secretion -> secretion.getSecretionType() == SecretionType.POO).count(),
+                        secretionsByUser.stream().filter(secretion -> secretion.getSecretionType() == SecretionType.PUKE).count())));
         return rankEntries;
     }
 
-
-    private Instant getInitialInstantFrom(PooRankPeriod pooRankPeriod) {
-        if (pooRankPeriod == PooRankPeriod.PAST_WEEK) {
+    private Instant getInitialInstantFrom(SecretionRankPeriod secretionRankPeriod) {
+        if (secretionRankPeriod == SecretionRankPeriod.PAST_WEEK) {
             LocalDate pastWeekFirstDay = LocalDate.now(clock).minusWeeks(1L).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
             return pastWeekFirstDay.atStartOfDay(ZONE_ID).toInstant();
         }
@@ -51,8 +50,8 @@ public class GetSecretionRankingUseCase {
         return LocalDate.of(pastMonthFirstDay.getYear(), pastMonthFirstDay.getMonthValue(), 1).atStartOfDay(ZONE_ID).toInstant();
     }
 
-    private Instant getFinalInstantFrom(PooRankPeriod pooRankPeriod) {
-        if (pooRankPeriod == PooRankPeriod.PAST_WEEK) {
+    private Instant getFinalInstantFrom(SecretionRankPeriod secretionRankPeriod) {
+        if (secretionRankPeriod == SecretionRankPeriod.PAST_WEEK) {
             LocalDate pastWeekLastDay = LocalDate.now(clock).with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
             return pastWeekLastDay.atTime(LocalTime.MAX).atZone(ZONE_ID).toInstant();
         }

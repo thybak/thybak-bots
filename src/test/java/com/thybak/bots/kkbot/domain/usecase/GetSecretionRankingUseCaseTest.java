@@ -1,7 +1,7 @@
 package com.thybak.bots.kkbot.domain.usecase;
 
-import com.thybak.bots.kkbot.domain.model.PooRankEntry;
-import com.thybak.bots.kkbot.domain.model.PooRankPeriod;
+import com.thybak.bots.kkbot.domain.model.SecretionRankEntry;
+import com.thybak.bots.kkbot.domain.model.SecretionRankPeriod;
 import com.thybak.bots.kkbot.domain.model.Secretion;
 import com.thybak.bots.kkbot.domain.model.SecretionType;
 import com.thybak.bots.kkbot.domain.provider.SecretionRepository;
@@ -36,31 +36,31 @@ public class GetSecretionRankingUseCaseTest {
     private GetSecretionRankingUseCase sut;
 
     @Test
-    void givenNoPooDataFromAPeriod_whenRun_thenReturnEmptyList() {
+    void givenNoSecretionDataFromAPeriod_whenRun_thenReturnEmptyList() {
         givenFixedClock();
         Mockito.when(secretionRepository.findAllByTimestampBetweenAndChatId(ArgumentMatchers.any(Instant.class), ArgumentMatchers.any(Instant.class), ArgumentMatchers.anyLong())).thenReturn(List.of());
 
-        assertEquals(0, sut.run(PooRankPeriod.PAST_WEEK, GetSecretionRankingUseCaseTest.TestHelper.CHAT_ID).size());
+        assertEquals(0, sut.run(SecretionRankPeriod.PAST_WEEK, GetSecretionRankingUseCaseTest.TestHelper.CHAT_ID).size());
     }
 
     @Test
-    void givenPooDataFromAWeeklyPeriod_whenRun_thenReturnPooRanking() {
+    void givenSecretionDataFromAWeeklyPeriod_whenRun_thenReturnSecretionRanking() {
         givenFixedClock();
         Mockito.when(secretionRepository.findAllByTimestampBetweenAndChatId(GetSecretionRankingUseCaseTest.TestHelper.INITIAL_WEEK_PERIOD_INSTANT, GetSecretionRankingUseCaseTest.TestHelper.FINAL_WEEK_PERIOD_INSTANT, GetSecretionRankingUseCaseTest.TestHelper.CHAT_ID)).thenReturn(GetSecretionRankingUseCaseTest.TestHelper.SECRETION_WEEK_ENTRIES);
 
-        List<PooRankEntry> pooRanking = sut.run(PooRankPeriod.PAST_WEEK, GetSecretionRankingUseCaseTest.TestHelper.CHAT_ID);
+        List<SecretionRankEntry> secretionRanking = sut.run(SecretionRankPeriod.PAST_WEEK, GetSecretionRankingUseCaseTest.TestHelper.CHAT_ID);
 
-        assertArrayEquals(GetSecretionRankingUseCaseTest.TestHelper.EXPECTED_WEEK_POO_RANKING.toArray(), pooRanking.toArray());
+        assertArrayEquals(GetSecretionRankingUseCaseTest.TestHelper.EXPECTED_WEEK_SECRETION_RANKING.toArray(), secretionRanking.toArray());
     }
 
     @Test
-    void givenPooDataFromAMonthlyPeriod_whenRun_thenReturnPooRanking() {
+    void givenSecretionDataFromAMonthlyPeriod_whenRun_thenReturnSecretionRanking() {
         givenFixedClock();
         Mockito.when(secretionRepository.findAllByTimestampBetweenAndChatId(GetSecretionRankingUseCaseTest.TestHelper.INITIAL_MONTH_PERIOD_INSTANT, GetSecretionRankingUseCaseTest.TestHelper.FINAL_MONTH_PERIOD_INSTANT, GetSecretionRankingUseCaseTest.TestHelper.CHAT_ID)).thenReturn(GetSecretionRankingUseCaseTest.TestHelper.SECRETION_MONTH_ENTRIES);
 
-        List<PooRankEntry> pooRanking = sut.run(PooRankPeriod.PAST_MONTH, GetSecretionRankingUseCaseTest.TestHelper.CHAT_ID);
+        List<SecretionRankEntry> secretionRanking = sut.run(SecretionRankPeriod.PAST_MONTH, GetSecretionRankingUseCaseTest.TestHelper.CHAT_ID);
 
-        assertArrayEquals(GetSecretionRankingUseCaseTest.TestHelper.EXPECTED_MONTH_POO_RANKING.toArray(), pooRanking.toArray());
+        assertArrayEquals(GetSecretionRankingUseCaseTest.TestHelper.EXPECTED_MONTH_SECRETION_RANKING.toArray(), secretionRanking.toArray());
     }
 
     private void givenFixedClock() {
@@ -84,22 +84,24 @@ public class GetSecretionRankingUseCaseTest {
                 new Secretion("USERNAME1", INITIAL_WEEK_PERIOD_INSTANT.plus(3L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO),
                 new Secretion("USERNAME1", INITIAL_WEEK_PERIOD_INSTANT.plus(4L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO),
                 new Secretion("USERNAME2", INITIAL_WEEK_PERIOD_INSTANT.plus(1L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO),
-                new Secretion("USERNAME2", INITIAL_WEEK_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO)
+                new Secretion("USERNAME2", INITIAL_WEEK_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO),
+                new Secretion("USERNAME2", INITIAL_WEEK_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID, SecretionType.PUKE)
         );
-        private static final List<PooRankEntry> EXPECTED_WEEK_POO_RANKING = List.of(
-                new PooRankEntry("USERNAME1", 3L),
-                new PooRankEntry("USERNAME2", 2L)
+        private static final List<SecretionRankEntry> EXPECTED_WEEK_SECRETION_RANKING = List.of(
+                new SecretionRankEntry("USERNAME2", 2L, 1L),
+                new SecretionRankEntry("USERNAME1", 3L, 0L)
         );
         private static final List<Secretion> SECRETION_MONTH_ENTRIES = List.of(
                 new Secretion("USERNAME1", INITIAL_MONTH_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO),
                 new Secretion("USERNAME1", INITIAL_MONTH_PERIOD_INSTANT.plus(3L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO),
                 new Secretion("USERNAME1", INITIAL_MONTH_PERIOD_INSTANT.plus(4L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO),
                 new Secretion("USERNAME2", INITIAL_MONTH_PERIOD_INSTANT.plus(1L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO),
-                new Secretion("USERNAME2", INITIAL_MONTH_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO)
+                new Secretion("USERNAME2", INITIAL_MONTH_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID, SecretionType.POO),
+                new Secretion("USERNAME2", INITIAL_MONTH_PERIOD_INSTANT.plus(2L, ChronoUnit.DAYS), CHAT_ID, SecretionType.PUKE)
         );
-        private static final List<PooRankEntry> EXPECTED_MONTH_POO_RANKING = List.of(
-                new PooRankEntry("USERNAME1", 3L),
-                new PooRankEntry("USERNAME2", 2L)
+        private static final List<SecretionRankEntry> EXPECTED_MONTH_SECRETION_RANKING = List.of(
+                new SecretionRankEntry("USERNAME2", 2L, 1L),
+                new SecretionRankEntry("USERNAME1", 3L, 0L)
         );
     }
 }

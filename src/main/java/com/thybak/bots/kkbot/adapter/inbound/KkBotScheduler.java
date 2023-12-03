@@ -1,7 +1,7 @@
 package com.thybak.bots.kkbot.adapter.inbound;
 
 import com.thybak.bots.kkbot.config.KkBotConfigurationProperties;
-import com.thybak.bots.kkbot.domain.model.PooRankPeriod;
+import com.thybak.bots.kkbot.domain.model.SecretionRankPeriod;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -21,22 +21,22 @@ public class KkBotScheduler {
 
     @Scheduled(cron = EVERY_MONDAY_AT_8_AM, zone = SPAIN_LOCAL_ZONE)
     public void publishWeeklyRank() {
-        final Update weeklyRankAction = createRankUpdateAction(PooRankPeriod.PAST_WEEK);
+        final Update weeklyRankAction = createRankUpdateAction(SecretionRankPeriod.PAST_WEEK);
         kkBotActionHandler.onUpdateReceived(weeklyRankAction);
     }
 
     @Scheduled(cron = EVERY_FIRST_DAY_OF_MONTH_AT_8_AM, zone = SPAIN_LOCAL_ZONE)
     public void publishMonthlyRank() {
-        final Update monthlyRankAction = createRankUpdateAction(PooRankPeriod.PAST_MONTH);
+        final Update monthlyRankAction = createRankUpdateAction(SecretionRankPeriod.PAST_MONTH);
         kkBotActionHandler.onUpdateReceived(monthlyRankAction);
     }
 
-    private Update createRankUpdateAction(PooRankPeriod pooRankPeriod)
+    private Update createRankUpdateAction(SecretionRankPeriod secretionRankPeriod)
     {
         final Update rankUpdateAction = new Update();
         final Message message = new Message();
         message.setChat(new Chat(kkBotConfigurationProperties.getGroupChatId(), ""));
-        message.setText(String.format("/rank %s", pooRankPeriod.getPeriodName()));
+        message.setText(String.format("/rank %s", secretionRankPeriod.getPeriodName()));
         rankUpdateAction.setMessage(message);
 
         return rankUpdateAction;

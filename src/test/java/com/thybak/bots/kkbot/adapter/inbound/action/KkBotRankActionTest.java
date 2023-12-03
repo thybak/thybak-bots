@@ -1,8 +1,8 @@
 package com.thybak.bots.kkbot.adapter.inbound.action;
 
 import com.thybak.bots.kkbot.adapter.inbound.dto.ActionResponse;
-import com.thybak.bots.kkbot.domain.model.PooRankEntry;
-import com.thybak.bots.kkbot.domain.model.PooRankPeriod;
+import com.thybak.bots.kkbot.domain.model.SecretionRankEntry;
+import com.thybak.bots.kkbot.domain.model.SecretionRankPeriod;
 import com.thybak.bots.kkbot.domain.usecase.GetSecretionRankingUseCase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,22 +39,33 @@ class KkBotRankActionTest {
     @Test
     void givenRankRequestWithoutData_whenExecuteAction_thenNoRankEntriesErrorIsReturned() {
         Update validRankRequest = TestHelper.givenValidUpdate();
-        Mockito.when(getSecretionRankingUseCase.run(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(List.of());
+        Mockito.when(getSecretionRankingUseCase.run(SecretionRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(List.of());
 
         ActionResponse actionResponse = sut.executeAction(validRankRequest);
         assertEquals(TestHelper.NO_RANK_ENTRIES_RETRIEVED.replaceAll("\\r?\\n", System.getProperty("line.separator")), actionResponse.getText());
-        Mockito.verify(getSecretionRankingUseCase).run(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
+        Mockito.verify(getSecretionRankingUseCase).run(SecretionRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
     }
 
     @Test
-    void givenRankRequestWithData_whenExecuteAction_thenRankEntriesAreReturned() {
+    void givenRankRequestWithPukeData_whenExecuteAction_thenRankEntriesAreReturned() {
         Update validRankRequest = TestHelper.givenValidUpdate();
-        Mockito.when(getSecretionRankingUseCase.run(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(TestHelper.RANK_ENTRIES);
+        Mockito.when(getSecretionRankingUseCase.run(SecretionRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(TestHelper.RANK_ENTRIES);
+
+        ActionResponse actionResponse = sut.executeAction(validRankRequest);
+
+        assertEquals(TestHelper.FULL_RANK_ENTRIES_MESSAGE.replaceAll("\\r?\\n", System.getProperty("line.separator")), actionResponse.getText());
+        Mockito.verify(getSecretionRankingUseCase).run(SecretionRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
+    }
+
+    @Test
+    void givenRankRequestWithoutPukeData_whenExecuteAction_thenRankEntriesAreReturned() {
+        Update validRankRequest = TestHelper.givenValidUpdate();
+        Mockito.when(getSecretionRankingUseCase.run(SecretionRankPeriod.PAST_WEEK, TestHelper.CHAT_ID)).thenReturn(TestHelper.NO_PUKES_RANK_ENTRIES);
 
         ActionResponse actionResponse = sut.executeAction(validRankRequest);
 
         assertEquals(TestHelper.RANK_ENTRIES_MESSAGE.replaceAll("\\r?\\n", System.getProperty("line.separator")), actionResponse.getText());
-        Mockito.verify(getSecretionRankingUseCase).run(PooRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
+        Mockito.verify(getSecretionRankingUseCase).run(SecretionRankPeriod.PAST_WEEK, TestHelper.CHAT_ID);
     }
 
     private static final class TestHelper {
@@ -63,14 +74,23 @@ class KkBotRankActionTest {
                 Cagones! Aquí está el ranking de la semana pasada:
                 Aquí hay que comer un poco más de fibra eh? Todavía no tengo datos para el periodo solicitado.""";
         private static final String WRONG_PARAMETER_TO_RANK = "Bobo o k? Pídeme el ranking de 'hoy', 'semana', 'mes', 'año', no de lo que tú quieras";
-        private static final List<PooRankEntry> RANK_ENTRIES = List.of(
-                new PooRankEntry("USERNAME1", 20L),
-                new PooRankEntry("USERNAME2", 10L)
+        private static final List<SecretionRankEntry> RANK_ENTRIES = List.of(
+                new SecretionRankEntry("USERNAME1", 20L, 0L),
+                new SecretionRankEntry("USERNAME2", 10L, 2L)
+        );
+        private static final List<SecretionRankEntry> NO_PUKES_RANK_ENTRIES = List.of(
+                new SecretionRankEntry("USERNAME1", 20L, 0L),
+                new SecretionRankEntry("USERNAME2", 10L, 0L)
         );
         private static final String RANK_ENTRIES_MESSAGE = """
                 Cagones! Aquí está el ranking de la semana pasada:
                 1 - USERNAME1 con 20 kks!
                 2 - USERNAME2 con 10 kks!
+                """;
+        private static final String FULL_RANK_ENTRIES_MESSAGE = RANK_ENTRIES_MESSAGE + """
+                
+                Y los que más han vomitado son:
+                1 - USERNAME2 con 2 potas!
                 """;
 
         private static Update givenValidUpdate() {

@@ -48,7 +48,7 @@ class KkBotRegisterPooActionTest {
     }
 
     private static final class TestHelper {
-        private static final String POO_COMMAND = new String(new byte[]{(byte) 0xf0, (byte) 0x9f, (byte) 0x92, (byte) 0xa9});
+        private static final String POO_COMMAND =  "\uD83D\uDCA9";
         private static final String SAVE_ERROR_MESSAGE = "Mi má, atascaste las tuberías y tu kk no se ha podido guardar. Habla con alguien pa que limpien tu mierda";
         private static final long CHAT_ID = 1L;
 
