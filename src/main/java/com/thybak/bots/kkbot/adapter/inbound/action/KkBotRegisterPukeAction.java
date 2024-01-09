@@ -22,7 +22,7 @@ public class KkBotRegisterPukeAction implements KkBotAction {
 
     @Override
     public ActionResponse executeAction(Update update) {
-        final ActionResponse actionResponse = new ActionResponse();
+        final ActionResponse actionResponse = ActionResponse.builder().build();
         if (!registerSecretionUseCase.run(update, SecretionType.PUKE)) {
             actionResponse.setText(SAVE_ERROR_MESSAGE);
         }

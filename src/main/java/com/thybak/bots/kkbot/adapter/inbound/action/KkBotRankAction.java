@@ -50,7 +50,7 @@ public class KkBotRankAction implements KkBotAction {
     private String getSecretionRankingFormattedFrom(List<SecretionRankEntry> secretionRanking, SecretionRankPeriod period) {
         final var sbRanking = new StringBuilder(String.format(RANK_HEADER_TEMPLATE, period.longPeriodName()));
         final var secretions = new ArrayList<>(secretionRanking);
-        secretions.sort((rankEntry1, rankEntry2) -> rankEntry2.getPoos().compareTo(rankEntry1.getPoos()));
+        secretions.sort((rankEntry1, rankEntry2) -> rankEntry2.poos().compareTo(rankEntry1.poos()));
 
         if (secretions.isEmpty()) {
             return sbRanking.append(NO_RANK_ENTRIES_RETRIEVED).toString();
@@ -59,22 +59,22 @@ public class KkBotRankAction implements KkBotAction {
         IntStream.range(0, secretions.size())
             .forEach(index -> {
                 final var secretionRankEntry = secretions.get(index);
-                if (secretionRankEntry.getPoos() == 0) {
+                if (secretionRankEntry.poos() == 0) {
                     return;
                 }
-                sbRanking.append(String.format("%d - %s con %d kks!%n", index + 1, secretionRankEntry.getUsername(), secretionRankEntry.getPoos()));
+                sbRanking.append(String.format("%d - %s con %d kks!%n", index + 1, secretionRankEntry.getUsernameWithEscapedUnderscore(), secretionRankEntry.poos()));
             });
 
-        if (secretions.stream().anyMatch(secretionRankEntry -> secretionRankEntry.getPukes() > 0)) {
+        if (secretions.stream().anyMatch(secretionRankEntry -> secretionRankEntry.pukes() > 0)) {
             sbRanking.append(String.format("%nY los que más han vomitado son:%n"));
-            secretions.sort((rankEntry1, rankEntry2) -> rankEntry2.getPukes().compareTo(rankEntry1.getPukes()));
+            secretions.sort((rankEntry1, rankEntry2) -> rankEntry2.pukes().compareTo(rankEntry1.pukes()));
             IntStream.range(0, secretions.size())
                     .forEach(index -> {
                         final var secretionRankEntry = secretions.get(index);
-                        if (secretionRankEntry.getPukes() == 0) {
+                        if (secretionRankEntry.pukes() == 0) {
                             return;
                         }
-                        sbRanking.append(String.format("%d - %s con %d potas!%n", index + 1, secretionRankEntry.getUsername(), secretionRankEntry.getPukes()));
+                        sbRanking.append(String.format("%d - %s con %d potas!%n", index + 1, secretionRankEntry.getUsernameWithEscapedUnderscore(), secretionRankEntry.pukes()));
                     });
         }
 

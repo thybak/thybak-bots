@@ -1,12 +1,9 @@
 package com.thybak.bots.kkbot.adapter.inbound.dto;
 
-import lombok.*;
+import lombok.Builder;
+import lombok.Data;
 
-@ToString
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Builder
 public class ActionResponse {
     private String text;
