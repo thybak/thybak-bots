@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 public class KkBotScheduler {
     private static final String EVERY_MONDAY_AT_8_AM = "0 0 8 * * 1";
     private static final String EVERY_FIRST_DAY_OF_MONTH_AT_8_AM = "0 0 8 1 * *";
+    private static final String EVERY_FIRST_DAY_OF_YEAR_AT_12_AM = "0 0 0 1 1 *";
     private static final String SPAIN_LOCAL_ZONE = "Europe/Madrid";
 
     private final KkBotActionHandler kkBotActionHandler;
@@ -29,6 +30,12 @@ public class KkBotScheduler {
     public void publishMonthlyRank() {
         final Update monthlyRankAction = createRankUpdateAction(SecretionRankPeriod.PAST_MONTH);
         kkBotActionHandler.onUpdateReceived(monthlyRankAction);
+    }
+
+    @Scheduled(cron = EVERY_FIRST_DAY_OF_YEAR_AT_12_AM, zone = SPAIN_LOCAL_ZONE)
+    public void publishYearlyRank() {
+        final Update yearlyRankAction = createRankUpdateAction(SecretionRankPeriod.PAST_YEAR);
+        kkBotActionHandler.onUpdateReceived(yearlyRankAction);
     }
 
     private Update createRankUpdateAction(SecretionRankPeriod secretionRankPeriod)

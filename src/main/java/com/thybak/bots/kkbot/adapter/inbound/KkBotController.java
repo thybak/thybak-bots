@@ -15,7 +15,6 @@ public class KkBotController {
     private final KkBotScheduler kkBotScheduler;
 
     @GetMapping("/rank")
-    @ResponseBody
     public void showRank(@RequestParam() String period) {
         final Optional<SecretionRankPeriod> pooRankPeriod = Arrays.stream(SecretionRankPeriod.values()).filter(pooRankPeriodEntry -> pooRankPeriodEntry.getPeriodName().equals(period)).findFirst();
         if (pooRankPeriod.isEmpty())
@@ -23,8 +22,10 @@ public class KkBotController {
 
         if (pooRankPeriod.get() == SecretionRankPeriod.PAST_WEEK) {
             kkBotScheduler.publishWeeklyRank();
-        } else {
+        } else if (pooRankPeriod.get() == SecretionRankPeriod.PAST_MONTH) {
             kkBotScheduler.publishMonthlyRank();
+        } else {
+            kkBotScheduler.publishYearlyRank();
         }
     }
 }

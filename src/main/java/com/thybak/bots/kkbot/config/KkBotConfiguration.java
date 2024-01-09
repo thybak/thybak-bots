@@ -20,7 +20,7 @@ public class KkBotConfiguration {
 
     @Bean
     public GetSecretionRankingUseCase getSecretionRankingUseCase(final Clock clock, final SecretionRepository secretionRepository) {
-        return new GetSecretionRankingUseCase(clock, secretionRepository);
+        return new GetSecretionRankingUseCase(secretionRepository, clock);
     }
 
     @Bean
